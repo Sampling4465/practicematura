@@ -8,5 +8,8 @@ namespace Spg.Fachtheorie.Aufgabe1.Model
 {
     // TODO: Rich DomainModel implementieren
     public enum EquipmentTypes
-    { }
+    {
+        SOLDERING_STATION,
+        OSCILLOSCOPE
+    }
 }

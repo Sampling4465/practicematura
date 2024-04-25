@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -30,7 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Spg.Fachtheorie.Aufgabe2.Api\Spg.Fachtheorie.Aufgabe2.Api.csproj" />
     <ProjectReference Include="..\..\src\Spg.Fachtheorie.Domain\Spg.Fachtheorie.Domain.csproj" />
-    <ProjectReference Include="..\Spg.Fachtheorie.Test.Core\Spg.Fachtheorie.Test.Core.csproj" />
+    <ProjectReference Include="..\Spg.Fachtheorie.Domain.Test\Spg.Fachtheorie.Domain.Test.csproj" />
   </ItemGroup>
 
 </Project>

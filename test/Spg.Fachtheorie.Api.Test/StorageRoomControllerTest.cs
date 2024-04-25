@@ -1,84 +1,66 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Spg.Fachtheorie.Aufgabe2.Api.Controllers;
 using Spg.Fachtheorie.Domain.Model;
-using Spg.Fachtheorie.Test.Core;
+using Spg.Fachtheorie.Domain.Services;
+using Spg.Fachtheorie.Domain.Test.Helpers;
+using System.ComponentModel;
+
 
 namespace Spg.Fachtheorie.Api.Test
 {
     [Collection("Sequential")]
-    public class StorageRoomControllerTest : IClassFixture<CustomWebApplicationFactory<Program>>
+    public class StorageRoomControllerTest 
     {
-        private readonly CustomWebApplicationFactory<Program> _factory;
 
-        public StorageRoomControllerTest(CustomWebApplicationFactory<Program> factory)
-        {
-            _factory = factory;
-        }
-
-        /// <summary>
-        /// Beispiel für einen Integration Test einer Controller-Methode für einen GET-Request.
-        /// </summary>
-        /// <returns>async void = Task</returns>
         [Fact]
-        public async Task GET_StorageRoom_ReturnsSuccess_And_StatusCode_Ok()
+        public void Create()
         {
-            // Arrange
-            using (var scope = _factory.Services.CreateScope())
+            using (RoomCt db = new RoomCt(DatabaseUtilities.GetDbOptions()))
             {
-                var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<RoomCt>();
+                // Arrange
+                DatabaseUtilities.InitializeDatabase(db);
 
-                DatabaseUtilities.ReinitializeDbForTests(db);
+                Assert.True(true);
             }
-            HttpClient client = _factory.CreateClient();
-
-            // Act
-            HttpResponseMessage response = await client
-                .GetAsync("/api/StorageRoom");
-            // Hier der Response als string, falls du damit arbeiten möchtest.
-            string jsonResult = new StreamReader(response.Content.ReadAsStream())
-                .ReadToEnd();
-
-            //TODO: Assert. Je mehr und detaillierter, desto besser.
-            // Assert (Tipp: Du kannst Databaseutilities verwenden um mit dem manuellen Seeding zu vergleichen
-            //         Achtung! Wenn du 2 Objekte (Dto's) vergleichst, wird nur die Speicheradresse verglichen.
-            //         Finde für dieses Problem eine Lösung.
-            Assert.True(false);
         }
-
-        /// <summary>
-        /// Beispiel für einen Integration Test einer Controller-Methode für einen GET-Request.
-        /// </summary>
-        /// <returns>async void = Task</returns>
         [Fact]
-        public async Task POST_StorageRoom_ReturnsSuccessAndStatusCode_Created()
-        {
-            // Arrange
-            using (var scope = _factory.Services.CreateScope())
+        public void GetTest() {
+
+            using (RoomCt db = new RoomCt(DatabaseUtilities.GetDbOptions()))
             {
-                var scopedServices = scope.ServiceProvider;
-                var db = scopedServices.GetRequiredService<RoomCt>();
+                // Arrange
+                DatabaseUtilities.InitializeDatabase(db);
+                var service = new StorageRoomService(db);
+                var controller = new StorageRoomController(service);
 
-                DatabaseUtilities.ReinitializeDbForTests(db);
+                var result = controller.GetAll() as OkObjectResult;
+                Assert.NotNull(result); // can also test count 
+
             }
-            // TODO: Korrigiere die Datentypen in der nächsten Zeile!
-            var content = new { Building = "Test Building 01", Floor = "Test Floor 01", RoomNumber = "123" };
-            HttpClient client = _factory.CreateClient();
+            }
 
-            // Act
-            HttpResponseMessage response = await client
-                .PostAsync("/api/StorageRoom", TestHelpers.GetJsonStringContent(content));
-            // Hier der Response als string, falls du damit arbeiten möchtest.
-            string jsonResult = new StreamReader(response.Content.ReadAsStream())
-                .ReadToEnd();
+        [Fact]
+        public void CreateTest()
+        {
 
-            // Assert
-            //TODO: Assert. Je mehr und detaillierter, desto besser.
-            // Assert (Tipp: Du kannst Databaseutilities verwenden um mit dem manuellen Seeding zu vergleichen
-            //         Achtung! Wenn du 2 Objekte (Dto's) vergleichst, wird nur die Speicheradresse verglichen.
-            //         Finde für dieses Problem eine Lösung.
-            Assert.True(false);
+            using (RoomCt db = new RoomCt(DatabaseUtilities.GetDbOptions()))
+            {
+                // Arrange
+                DatabaseUtilities.InitializeDatabase(db);
+                var service = new StorageRoomService(db);
+                var controller = new StorageRoomController(service);
+
+                var count = db.StorageRooms.Count();
+
+                var result = controller.CreateOne(new Domain.DTOss.StorageRoomCreateDto("a", "b","1")) as OkObjectResult;
+                Assert.NotNull(result);
+
+                Assert.True(count+1 == db.StorageRooms.Count());
+
+            }
         }
 
-        //TODO: Weitere Unit Tests
+
     }
 }

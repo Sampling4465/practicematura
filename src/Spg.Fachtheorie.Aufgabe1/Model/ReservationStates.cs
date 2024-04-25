@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Spg.Fachtheorie.Aufgabe1.Model
 {
-    // TODO: Rich DomainModel implementieren
     public enum ReservationStates
-    { }
+    {
+        REQUESTED,
+        ACCEPTED
+
+    }
 }

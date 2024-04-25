@@ -1,37 +1,91 @@
-﻿namespace Spg.Fachtheorie.Domain.Services
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Spg.Fachtheorie.Domain.DTOs;
+using Spg.Fachtheorie.Domain.DTOss;
+using Spg.Fachtheorie.Domain.Model;
+
+namespace Spg.Fachtheorie.Domain.Services;
+
+public class CreateDividerBoxLocationDto
 {
-    // TODO: Tennung mittels Interface. Diese sind im dafür vorbereiteten Namespace (in diesem Projekt) zu implementieren.
-    // TODO: Trennung in Read/Write-Interfaces
-    public class DeviderBoxLocationService
+    public DateTime from { get; set; }
+    public DateTime? to { get; set; }
+    public string byWhom { get; set; }
+    public string notes { get; set; }
+    public int DividerBoxId { get; set; }
+    public int? StorageRoomId { get; set; }
+
+}
+public record DividerBoxLocationDto(int Id, DateTime from, DateTime? to, string byWhom, string notes, int DividerBoxId, int StorageRoomId);
+
+
+
+// TODO: Tennung mittels Interface. Diese sind im dafür vorbereiteten Namespace (in diesem Projekt) zu implementieren.
+// TODO: Trennung in Read/Write-Interfaces
+public class DeviderBoxLocationService
+{
+    private readonly RoomCt _db;
+
+    public DeviderBoxLocationService(RoomCt db)
     {
-        // TODO: DBContext mittels DependencyInjection aktivieren
+        _db = db;
+    }
+    public List<DividerBoxLocationDto> GetAll()
+    {
+        return _db.DividerBoxLocations.Select(a => new DividerBoxLocationDto(a.Id, a.From, a.Until, a.ByWhoom, a.Notes, a.DividerBoxNavigation.Id, a.StorageRoomNavigation.Id)).ToList();
 
-        // TODO: Ergänze gegebenenfalls notwendige Parameter UND korrigiere den Rückgabetyp
-        public List<object> GetAll()
+    }
+    public DividerBoxLocationDto GetSingle(int Id)
+    {
+        return _db.DividerBoxLocations.Where(a => a.Id == Id).Select(a => new DividerBoxLocationDto(a.Id, a.From, a.Until, a.ByWhoom, a.Notes, a.DividerBoxNavigation.Id, a.StorageRoomNavigation.Id)).FirstOrDefault();
+    }
+
+
+    public DividerBoxLocationDto Create(CreateDividerBoxLocationDto dto)
+    {
+        if (_db.DividerBoxes.FirstOrDefault(a => a.Id == dto.DividerBoxId) == null || string.IsNullOrEmpty(dto.byWhom) || dto.from == null)
         {
-            //TODO: Implemnentierung lt. Angabe
-            throw new NotImplementedException();
+            return null;
         }
 
-        //TODO: Ergänze gegebenenfalls notwendige Parameter UND korrigiere den Rückgabetyp
-        public object GetSingle()
+        var overlay = _db.DividerBoxLocations.FirstOrDefault(a => a.From == dto.from && a.DividerBoxNavigation.Id == dto.DividerBoxId);
+        if (overlay != null)
         {
-            //TODO: Implemnentierung lt. Angabe
-            throw new NotImplementedException();
+            dto.from = overlay.Until;
+            dto.to = dto.from.AddDays(1);
         }
 
-        //TODO: Ergänze gegebenenfalls notwendige Parameter
-        public void Create()
-        {
-            //TODO: Implemnentierung lt. Angabe
-            throw new NotImplementedException();
-        }
+        DividerBox d;
+        StorageRoom sr = _db.StorageRooms.First(); // otherwise error it is not nullable 
 
-        //TODO: Ergänze gegebenenfalls notwendige Parameter
-        public void Delete() 
+
+        if (dto.StorageRoomId != null)
         {
-            //TODO: Implemnentierung lt. Angabe
-            throw new NotImplementedException();
+            sr = _db.StorageRooms.FirstOrDefault(a => a.Id == dto.StorageRoomId);
         }
+        d = _db.DividerBoxes.FirstOrDefault(a => a.Id == dto.DividerBoxId);
+
+        var value = new DividerBoxLocation() { From = dto.from, Until = dto.to ?? dto.from.AddDays(1), Notes = "", ByWhoom = dto.byWhom, StorageRoomNavigation = sr, DividerBoxNavigation = d };
+
+
+
+        _db.Add(value);
+        _db.SaveChanges();
+        return GetSingle(value.Id);
+    }
+
+
+    //TODO: Ergänze gegebenenfalls notwendige Parameter
+    public void Delete(int Id)
+    {
+        var a = _db.DividerBoxLocations.FirstOrDefault(a => a.Id == Id);
+
+        if (a == null) throw new ArgumentException();
+
+        _db.DividerBoxLocations.Remove(a);
+        _db.SaveChanges();
+
     }
 }
+
+

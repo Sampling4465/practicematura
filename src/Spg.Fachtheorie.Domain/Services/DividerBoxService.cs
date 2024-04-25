@@ -1,37 +1,54 @@
-﻿namespace Spg.Fachtheorie.Domain.Services
+﻿using Spg.Fachtheorie.Domain.DTOs;
+using Spg.Fachtheorie.Domain.Model;
+
+
+
+
+    
+    
+namespace Spg.Fachtheorie.Domain.Services
 {
     //TODO: Tennung mittels Interface. Diese sind im dafür vorbereiteten Namespace (in diesem Projekt) zu implementieren.
     //TODO: Trennung in Read/Write-Interfaces
     public class DividerBoxService
     {
-        //TODO: DBContext mittels DependencyInjection aktivieren
+        private readonly RoomCt _db;
 
-        //TODO: Ergänze gegebenenfalls notwendige Parameter UND korrigiere den Rückgabetyp
-        public List<object> GetAll()
+        public DividerBoxService(RoomCt db)
         {
-            //TODO: Implemnentierung lt. Angabe
-            throw new NotImplementedException();
+            _db = db;
+        }
+        public List<DividerBoxDto> GetAll()
+        {
+            return _db.DividerBoxes.Select(a=> new DividerBoxDto(a.Id,a.Name,a.NumberOfDeviders)).ToList();
         }
 
-        //TODO: Ergänze gegebenenfalls notwendige Parameter UND korrigiere den Rückgabetyp
-        public object GetSingle()
+        public DividerBoxDto GetSingle(int Id)
         {
-            //TODO: Implemnentierung lt. Angabe
-            throw new NotImplementedException();
+            return _db.DividerBoxes.Where(a => a.Id == Id).Select(a => new DividerBoxDto(a.Id, a.Name, a.NumberOfDeviders)).FirstOrDefault();
         }
-
         //TODO: Ergänze gegebenenfalls notwendige Parameter
-        public void Create()
+        public DividerBoxDto Create(DividerBoxPostDto dto)
         {
-            //TODO: Implemnentierung lt. Angabe
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(dto.Name) || dto.NumberOfDeviders < 0) return null;
+
+            var s = new DividerBox() {Name= dto.Name, NumberOfDeviders  = dto.NumberOfDeviders };
+
+            var a = _db.DividerBoxes.Add(s);
+            _db.SaveChanges();
+
+            return GetSingle(s.Id);
+
         }
 
-        //TODO: Ergänze gegebenenfalls notwendige Parameter
-        public void Delete()
+        public void Delete(int Id)
         {
-            //TODO: Implemnentierung lt. Angabe
-            throw new NotImplementedException();
+            var a = _db.DividerBoxes.FirstOrDefault(a => a.Id == Id);
+
+            if (a == null) throw new ArgumentException();
+
+            _db.DividerBoxes.Remove(a);
+            _db.SaveChanges();
         }
     }
 }

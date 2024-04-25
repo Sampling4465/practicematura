@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Spg.Fachtheorie.Aufgabe1.Model
 {
-    public class WorkPlace : ReservableItem
+    public interface BaseInterface<T>
     {
-        public WorkPlace(string name) : base(name)
-        {
-        }
+        T Id { get;  }
+
     }
 }

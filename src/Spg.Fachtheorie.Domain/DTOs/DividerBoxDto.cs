@@ -1,4 +1,4 @@
 ﻿namespace Spg.Fachtheorie.Domain.DTOs
 {
-    //TODO: Implementierung
+    public record DividerBoxDto(int Id, string name, int numberOfDividers);
 }
